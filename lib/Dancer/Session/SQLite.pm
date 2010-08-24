@@ -26,13 +26,7 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Dancer::Session::SQLite;
-
-    my $foo = Dancer::Session::SQLite->new();
+This module implements a SQLite-based backend to Dancer::Session.
     ...
 
 =head1 EXPORT
