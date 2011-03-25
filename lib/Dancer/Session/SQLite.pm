@@ -40,7 +40,8 @@ This module doesn't export any methods. All interaction is via your Dancer appli
 
 sub init {
     my ($class) = @_;
-
+	$class->SUPER::init(@_);
+	
 	my $db = setting('db');
     $dbh = DBI->connect(
         "dbi:SQLite:dbname=$session_db",
@@ -78,7 +79,6 @@ sub create {
     my ($class) = @_;
 
     my $self = Dancer::Session::SQLite->new;
-    $self->SUPER::init(@_);
     $self->flush;
     
     return $self;
