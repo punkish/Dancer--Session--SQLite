@@ -17,17 +17,16 @@ Dancer::Session::SQLite - SQLite-based session backend for Dancer
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 =head1 SYNOPSIS
 
 This module implements a SQLite-based backend to Dancer::Session.
-    ...
 
 =head1 EXPORT
 
@@ -44,11 +43,11 @@ sub init {
 
 	my $db = setting('db');
     $dbh = DBI->connect(
-        "dbi:SQLite:dbname=$db",
+        "dbi:SQLite:dbname=$session_db",
         "",
         "", 
-        {RaiseError => 1, AutoCommit => 0}
-    ) or die "Can't connect to $db: ", $DBI::errstr, "\n";
+        {RaiseError => 1, AutoCommit => 1}
+    ) or die "Can't connect to $session_db: ", $DBI::errstr, "\n";
     
 
     # make sure session_table exists
@@ -59,8 +58,12 @@ sub init {
     my ($name) = $sth->fetchrow_array;
     
     unless ($name) {
-        my $str = "'sessions' table doesn't exist in $db. Please create a table with the following schema:\n\n";
-        $str .= "'CREATE TABLE sessions (id TEXT UNIQUE NOT NULL, a_session BLOB);'\n";
+        my $str = "'sessions' table doesn't exist in $session_db. ";
+        $str .= "Please create a table with the following schema:\n\n";
+        $str .= "    CREATE TABLE sessions (\n";
+        $str .= "        id TEXT UNIQUE NOT NULL, \n";
+        $str .= "        a_session BLOB \n";
+        $str .= "    );'\n";
         die $str;
     }
 }
@@ -75,6 +78,7 @@ sub create {
     my ($class) = @_;
 
     my $self = Dancer::Session::SQLite->new;
+    $self->SUPER::init(@_);
     $self->flush;
     
     return $self;
@@ -107,8 +111,6 @@ sub session_db {
     });
     $sth->execute($id);
     my ($a_session) = $sth->fetchrow_array;
-    $sth->finish;
-    $dbh->commit;
     
     return $a_session;
 }
@@ -127,7 +129,6 @@ sub destroy {
         	DELETE FROM sessions WHERE id = ?
 	    });
 	    $sth->execute($self->id);
-	    $dbh->commit;
     }
 }
 
@@ -154,8 +155,7 @@ sub flush {
 	    	VALUES (?, ?)
 	    });
     }
-    $sth->execute(Storable::freeze($self), $self->id);  
-    $dbh->commit;
+    $sth->execute(Storable::freeze($self), $self->id);
     
     return $self;
 }
