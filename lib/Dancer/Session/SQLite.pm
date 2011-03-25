@@ -36,13 +36,15 @@ This module doesn't export any methods. All interaction is via your Dancer appli
 
 =head2 init
 
+The module expects a config key called 'session_db' that contains the full path to and name of the session database. Make sure the database and the directory it is in are writeable by the user under which the web server runs.
+
 =cut
 
 sub init {
     my ($class) = @_;
 	$class->SUPER::init(@_);
 	
-	my $db = setting('db');
+	my $session_db = setting('session_db');
     $dbh = DBI->connect(
         "dbi:SQLite:dbname=$session_db",
         "",
